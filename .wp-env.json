@@ -1,0 +1,13 @@
+{
+	"$schema": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/schemas/json/wp-env.json",
+	"core": "WordPress/WordPress",
+	"phpVersion": "8.4",
+	"themes": [
+		"./wp-content/themes/eateggs"
+	],
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_DISPLAY": true,
+		"SCRIPT_DEBUG": true
+	}
+}
