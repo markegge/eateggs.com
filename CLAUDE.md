@@ -63,36 +63,42 @@ in. Non-obvious mechanics you must respect:
 - Prefix all theme functions/globals with `eateggs_` / classes with `Eateggs_`.
 - Target **PHP 8.1** (matches the linter; keep it in sync with the server's PHP —
   see `DEPLOY.md` §1).
-- Note: this environment has **no PHP CLI and no local WordPress**, so you can't
-  run `php -l`, WP, or Theme Check here. For real validation use a local WP
-  (`wp-env` or Local) and run the Theme Check plugin. A pragmatic syntax check
-  without PHP: parse files with the Node `php-parser` package.
+- Note: there's no PHP CLI on the host, but **Docker is available** — run the
+  CI lint locally with a PHP 8.1 + PHPCS image (matches CI exactly). Build:
+  `docker build -f /tmp/phpcs.Dockerfile -t eateggs-phpcs /tmp` (see the recipe
+  in Claude's project memory), then from the repo root:
+  `docker run --rm -v "$PWD":/app -w /app eateggs-phpcs phpcbf` to auto-fix and
+  `… phpcs -q --report=summary` to check. **Run this before pushing** — the lint
+  gate blocks deploys. For WordPress-specific review (Theme Check) use a local WP.
 
 ## Deploy flow
 
 Branch → edit theme → open PR. CI lints (`php -l` + PHPCS). Merge to `main` →
-auto-deploy to **staging** (`staging.eateggs.com`) → **production** waits for a
-**manual approval** (the `production` GitHub Environment's required reviewer),
-backs up the live theme to a timestamped `.bak-*` dir, then rsyncs. Rollback =
-restore a `.bak-*` dir (see `DEPLOY.md` → Rollback).
+CI lints, then the **production** job waits for a **manual approval** (the
+`production` GitHub Environment's required reviewer), backs up the live theme to
+a timestamped `.bak-*` dir, then rsyncs and flushes cache. **Production only —
+there is no staging.** The runner reaches the server over a **Cloudflare Tunnel**
+(`ssh.eateggs.com`) via `cloudflared access ssh`; set `CF_ACCESS_CLIENT_ID` /
+`CF_ACCESS_CLIENT_SECRET` secrets if the hostname is behind Cloudflare Access.
+Rollback = restore a `.bak-*` dir (see `DEPLOY.md` → Rollback).
 
 If you rename the theme directory, update **all** of: `.gitignore` (the
 `!wp-content/themes/eateggs/` whitelist), `phpcs.xml` (`<file>`), and
-`deploy.yml` (`THEME_DIR` + the `*_PATH` secrets on the server).
+`deploy.yml` (`THEME_DIR` + the `PROD_PATH`/`PROD_WP_PATH` secrets on the server).
 
 ## Outstanding work (the actual handoff)
 
-Setup, not yet done — most needs the repo owner's console/credentials:
+Setup status — repo and GitHub-side config are done; server side is the owner's:
 
-1. **Create the GitHub repo** (if not already): from the repo root,
-   `gh repo create eateggs.com --public --source=. --remote=origin --push`.
-   `gh` isn't available in the Cowork sandbox; run it on the Mac where `gh` is
-   authed, or push via an authed remote.
-2. **GitHub secrets + Environments** — `DEPLOY.md` §5–6. Until these exist the
-   deploy jobs can't connect to anything; only the lint job is meaningful.
-3. **Server prep** — `DEPLOY.md` §0–4: find the origin IP behind Cloudflare
-   (Cloudflare dashboard → DNS → the A record's Content shows it), create the
-   restricted `deploy` user + SSH key, stand up staging.
+1. ✅ **GitHub repo** created: `github.com/markegge/eateggs.com` (public).
+2. **GitHub secrets + Environment** — `DEPLOY.md` §5–6. Done: the `production`
+   Environment (required reviewer) and the `SSH_PRIVATE_KEY`, `PROD_HOST`,
+   `PROD_PATH`, `PROD_WP_PATH` secrets. Still needed: `PROD_USER`, and
+   `CF_ACCESS_CLIENT_ID`/`CF_ACCESS_CLIENT_SECRET` if the SSH host is behind
+   Cloudflare Access.
+3. **Server prep** — `DEPLOY.md` §2–4: create the restricted `deploy` user,
+   install `eateggs_deploy.pub`, and stand up the cloudflared tunnel for
+   `ssh.eateggs.com`. (No origin IP needed — access is via the tunnel.)
 4. **Activate + configure in wp-admin** — `DEPLOY.md` §7: activate "eateggs", set
    Reading to show latest posts, assign a Primary Menu, save Permalinks.
 
