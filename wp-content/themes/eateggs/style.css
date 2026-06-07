@@ -1,0 +1,21 @@
+/*
+Theme Name: eateggs
+Theme URI: https://www.eateggs.com
+Author: Mark Egge
+Author URI: https://egge.us
+Description: A warm, editorial blog theme for eateggs — trip reports from the Continental Divide, mountain-town notes from Bozeman, and the occasional bread post. Converted from the static eateggs design.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.5
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: eateggs
+Tags: blog, one-column, custom-menu, featured-images, translation-ready
+*/
+
+/*
+ * The visual styles live in assets/tokens.css and assets/styles.css,
+ * enqueued from functions.php. This file exists for the WordPress theme
+ * header above and for any small overrides you want to add by hand.
+ */

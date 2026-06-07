@@ -1,0 +1,44 @@
+# This repo tracks ONLY custom code (the eateggs theme, and later any mu-plugins).
+# WordPress core, third-party plugins, uploads, and secrets are NOT tracked.
+
+# WordPress core (managed on the server, not in git)
+/wp-admin/
+/wp-includes/
+/index.php
+/wp-*.php
+/xmlrpc.php
+/license.txt
+/readme.html
+
+# Secrets & server-specific config
+wp-config.php
+*.env
+.env
+.htpasswd
+
+# Uploaded media & generated content
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backup*/
+
+# Everything in wp-content EXCEPT our tracked theme.
+wp-content/plugins/
+wp-content/themes/*
+!wp-content/themes/eateggs/
+
+# Dependencies / build
+vendor/
+node_modules/
+composer.lock
+package-lock.json
+
+# Design source archive (the original static handoff)
+*.zip
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

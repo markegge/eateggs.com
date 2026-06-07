@@ -1,0 +1,124 @@
+name: CI / Deploy
+
+# PRs are linted. Pushes to main deploy to staging automatically, then to
+# production after a manual approval (configured via the "production"
+# GitHub Environment — see DEPLOY.md).
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  THEME_DIR: wp-content/themes/eateggs
+
+jobs:
+  lint:
+    name: Lint (php -l + PHPCS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer, cs2pr
+          coverage: none
+
+      - name: PHP syntax check (php -l)
+        run: |
+          set -e
+          find "$THEME_DIR" -name '*.php' -print0 \
+            | xargs -0 -n1 -P4 php -l
+
+      - name: Install PHPCS + WordPress Coding Standards
+        run: |
+          composer global require --no-interaction --no-progress \
+            squizlabs/php_codesniffer \
+            wp-coding-standards/wpcs:^3 \
+            phpcsstandards/phpcsutils \
+            phpcsstandards/phpcsextra
+          echo "$HOME/.composer/vendor/bin" >> "$GITHUB_PATH"
+
+      - name: Run PHPCS
+        run: phpcs -q --report=checkstyle | cs2pr
+
+  deploy-staging:
+    name: Deploy to staging
+    needs: lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.eateggs.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Rsync theme to staging
+        run: |
+          rsync -az --delete \
+            --exclude='.git*' --exclude='node_modules' --exclude='vendor' \
+            -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts" \
+            "$THEME_DIR/" \
+            "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PATH }}/"
+
+      - name: Flush cache (best effort)
+        continue-on-error: true
+        run: |
+          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts \
+            "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" \
+            "wp cache flush --path=${{ secrets.STAGING_WP_PATH }} || true"
+
+  deploy-production:
+    name: Deploy to production
+    needs: deploy-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # The "production" environment requires a manual approval (a required
+    # reviewer) so a merge never reaches the live site unattended.
+    environment:
+      name: production
+      url: https://www.eateggs.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Back up current theme on server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts \
+            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" \
+            "cp -a '${{ secrets.PROD_PATH }}' '${{ secrets.PROD_PATH }}.bak-$(date +%Y%m%d%H%M%S)' || true"
+
+      - name: Rsync theme to production
+        run: |
+          rsync -az --delete \
+            --exclude='.git*' --exclude='node_modules' --exclude='vendor' \
+            -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts" \
+            "$THEME_DIR/" \
+            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_PATH }}/"
+
+      - name: Flush cache (best effort)
+        continue-on-error: true
+        run: |
+          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts \
+            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" \
+            "wp cache flush --path=${{ secrets.PROD_WP_PATH }} || true"
