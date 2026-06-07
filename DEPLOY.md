@@ -28,7 +28,7 @@ Current values (already baked into the GitHub secrets):
 
 The rsync uses `--delete`, so `PROD_PATH` must be the **theme-specific** dir
 above — never the `themes/` parent, or it would delete sibling themes. If the
-server's PHP differs from 8.1, change `php-version` in
+server's PHP differs from 8.4, change `php-version` in
 `.github/workflows/deploy.yml` to match.
 
 ---
