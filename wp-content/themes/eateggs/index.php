@@ -35,13 +35,18 @@ if ( $eateggs_cats ) :
 	<div class="container">
 
 	<div class="idx-head">
-		<p class="eyebrow"><?php esc_html_e( 'Latest', 'eateggs' ); ?></p>
-		<h1><?php esc_html_e( 'Notes from the saddle, the kitchen, and Bozeman.', 'eateggs' ); ?></h1>
-		<p class="lede"><?php esc_html_e( 'Long-form trip reports, route beta, and the occasional sourdough post-mortem.', 'eateggs' ); ?></p>
+		<h1><?php echo esc_html( eateggs_hero_text( 'heading' ) ); ?></h1>
+		<p class="lede"><?php echo esc_html( eateggs_hero_text( 'lede' ) ); ?></p>
 	</div>
 
 	<?php
 	if ( have_posts() ) :
+		?>
+	<div class="sec-head">
+		<span class="sec-lbl"><?php esc_html_e( 'Latest', 'eateggs' ); ?></span>
+		<span class="sec-rule" aria-hidden="true"></span>
+	</div>
+		<?php
 		$eateggs_i = 0;
 		while ( have_posts() ) :
 			the_post();
@@ -60,7 +65,6 @@ if ( $eateggs_cats ) :
 		<?php endif; ?>
 		</div>
 		<div class="feat-body">
-		<span class="flag"><?php esc_html_e( 'Latest', 'eateggs' ); ?></span>
 		<div class="pmeta">
 				<?php
 				if ( $eateggs_cat ) :

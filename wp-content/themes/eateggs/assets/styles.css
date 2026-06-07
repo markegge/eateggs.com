@@ -77,6 +77,11 @@ img { max-width:100%; display:block; }
 .idx-head h1 { font-family:var(--head); font-weight:800; font-size:clamp(30px,4vw,40px); letter-spacing:-0.025em; line-height:1.05; margin:12px 0 0; color:var(--ink); }
 .idx-head .lede { font-size:17px; color:var(--ink-mid); margin:14px 0 0; line-height:1.6; }
 
+/* Section label that introduces the post list (LATEST ─────). */
+.sec-head { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.sec-head .sec-lbl { font-weight:600; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--cta); flex:0 0 auto; }
+.sec-head .sec-rule { flex:1 1 auto; height:1px; background:var(--rule); }
+
 .feat { display:grid; grid-template-columns:1.05fr 0.95fr; background:var(--surface); border:1px solid var(--rule); border-radius:20px; overflow:hidden; box-shadow:0 6px 20px rgba(30,44,36,0.05); margin-bottom:34px; transition:box-shadow .2s, transform .2s, border-color .2s; }
 .feat:hover { box-shadow:0 14px 36px rgba(30,44,36,0.10); transform:translateY(-2px); border-color:var(--rule-strong); }
 .feat-shot { background:var(--accent-soft); min-height:340px; position:relative; }
@@ -133,6 +138,8 @@ img { max-width:100%; display:block; }
 .prose p { font-family:var(--serif); font-size:20px; line-height:1.7; color:#33403a; margin:0 0 22px; }
 .prose p.lead-in { margin-top:24px; }
 .prose strong { color:var(--ink); font-weight:600; }
+.prose a { color:var(--cta); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1px; }
+.prose a:hover { color:var(--cta-deep); }
 .prose h2 { font-family:var(--head); font-weight:800; font-size:26px; letter-spacing:-0.015em; color:var(--ink); margin:40px 0 14px; scroll-margin-top:calc(var(--nav-h) + 30px); }
 .prose blockquote { margin:30px 0; padding:4px 0 4px 24px; border-left:3px solid var(--cta); font-family:var(--serif); font-style:italic; font-weight:500; font-size:23px; line-height:1.4; color:var(--ink); }
 .prose figure { margin:32px 0; }
