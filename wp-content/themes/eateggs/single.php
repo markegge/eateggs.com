@@ -22,66 +22,69 @@ while ( have_posts() ) :
 
 <!-- ============ POST ============ -->
 <article class="post">
-  <div class="container">
-    <div class="post-grid">
+	<div class="container">
+	<div class="post-grid">
 
-      <aside class="railbox">
-        <dl>
-          <div class="rl"><dt><?php esc_html_e( 'Published', 'eateggs' ); ?></dt><dd><?php echo esc_html( get_the_date() ); ?></dd></div>
-		  <?php if ( $eateggs_cat ) : ?>
-          <div class="rl"><dt><?php esc_html_e( 'Category', 'eateggs' ); ?></dt><dd style="color:var(--cta-deep)"><a href="<?php echo esc_url( get_category_link( $eateggs_cat->term_id ) ); ?>"><?php echo esc_html( $eateggs_cat->name ); ?></a></dd></div>
-		  <?php endif; ?>
-          <div class="rl"><dt><?php esc_html_e( 'Read time', 'eateggs' ); ?></dt><dd><?php echo esc_html( $eateggs_min ); ?> min</dd></div>
-		  <?php if ( $eateggs_distance ) : ?>
-          <div class="rl"><dt><?php esc_html_e( 'Distance', 'eateggs' ); ?></dt><dd><?php echo esc_html( $eateggs_distance ); ?></dd></div>
-		  <?php endif; ?>
-        </dl>
+		<aside class="railbox">
+		<dl>
+			<div class="rl"><dt><?php esc_html_e( 'Published', 'eateggs' ); ?></dt><dd><?php echo esc_html( get_the_date() ); ?></dd></div>
+			<?php if ( $eateggs_cat ) : ?>
+			<div class="rl"><dt><?php esc_html_e( 'Category', 'eateggs' ); ?></dt><dd style="color:var(--cta-deep)"><a href="<?php echo esc_url( get_category_link( $eateggs_cat->term_id ) ); ?>"><?php echo esc_html( $eateggs_cat->name ); ?></a></dd></div>
+			<?php endif; ?>
+			<div class="rl"><dt><?php esc_html_e( 'Read time', 'eateggs' ); ?></dt><dd><?php echo esc_html( $eateggs_min ); ?> min</dd></div>
+			<?php if ( $eateggs_distance ) : ?>
+			<div class="rl"><dt><?php esc_html_e( 'Distance', 'eateggs' ); ?></dt><dd><?php echo esc_html( $eateggs_distance ); ?></dd></div>
+			<?php endif; ?>
+		</dl>
 		<?php eateggs_render_toc(); ?>
-      </aside>
+		</aside>
 
-      <div class="post-head">
-        <div class="pmeta">
-		  <?php if ( $eateggs_cat ) : ?><span class="cat"><?php echo esc_html( $eateggs_cat->name ); ?></span><span class="sep">&middot;</span><?php endif; ?>
-          <span>
-		  <?php
+		<div class="post-head">
+		<div class="pmeta">
+			<?php
+			if ( $eateggs_cat ) :
+				?>
+				<span class="cat"><?php echo esc_html( $eateggs_cat->name ); ?></span><span class="sep">&middot;</span><?php endif; ?>
+			<span>
+			<?php
 			/* translators: %s: post author name. */
 			printf( esc_html__( 'By %s', 'eateggs' ), esc_html( get_the_author() ) );
-		  ?>
-          </span><span class="sep">&middot;</span><span><?php echo esc_html( get_the_date() ); ?></span>
-        </div>
-        <h1><?php the_title(); ?></h1>
-      </div>
-
-	  <?php if ( has_post_thumbnail() ) : ?>
-      <div class="post-hero"><?php the_post_thumbnail( 'large' ); ?></div>
-		<?php
-		$eateggs_caption = wp_get_attachment_caption( get_post_thumbnail_id() );
-		if ( $eateggs_caption ) :
 			?>
-      <p class="post-cap"><?php echo esc_html( $eateggs_caption ); ?></p>
+			</span><span class="sep">&middot;</span><span><?php echo esc_html( get_the_date() ); ?></span>
+		</div>
+		<h1><?php the_title(); ?></h1>
+		</div>
+
+		<?php if ( has_post_thumbnail() ) : ?>
+		<div class="post-hero"><?php the_post_thumbnail( 'large' ); ?></div>
+			<?php
+			$eateggs_caption = wp_get_attachment_caption( get_post_thumbnail_id() );
+			if ( $eateggs_caption ) :
+				?>
+		<p class="post-cap"><?php echo esc_html( $eateggs_caption ); ?></p>
+			<?php endif; ?>
+		<?php else : ?>
+		<div class="post-hero"><span class="ph"><?php esc_html_e( 'Hero photo', 'eateggs' ); ?></span></div>
 		<?php endif; ?>
-	  <?php else : ?>
-      <div class="post-hero"><span class="ph"><?php esc_html_e( 'Hero photo', 'eateggs' ); ?></span></div>
-	  <?php endif; ?>
 
-      <div class="prose">
+		<div class="prose">
 		<?php echo wp_kses_post( $eateggs_content ); ?>
-      </div>
+		</div>
 
-	  <?php
+		<?php
 		$eateggs_tags = get_the_tags();
 		if ( $eateggs_tags ) :
 			?>
-      <div class="post-foot">
-        <span class="lbl"><?php esc_html_e( 'Tagged', 'eateggs' ); ?></span>
-		<?php foreach ( $eateggs_tags as $eateggs_tag ) : ?>
-        <a class="tagpill" href="<?php echo esc_url( get_tag_link( $eateggs_tag->term_id ) ); ?>"><?php echo esc_html( $eateggs_tag->name ); ?></a>
+		<div class="post-foot">
+		<span class="lbl"><?php esc_html_e( 'Tagged', 'eateggs' ); ?></span>
+			<?php foreach ( $eateggs_tags as $eateggs_tag ) : ?>
+		<a class="tagpill" href="<?php echo esc_url( get_tag_link( $eateggs_tag->term_id ) ); ?>"><?php echo esc_html( $eateggs_tag->name ); ?></a>
 		<?php endforeach; ?>
-      </div>
-	  <?php endif; ?>
+		</div>
+		<?php endif; ?>
 
-    </div>
-  </div>
+	</div>
+	</div>
 </article>
 
 	<?php

@@ -16,6 +16,11 @@ wp-config.php
 .env
 .htpasswd
 
+# Deploy SSH key pair (generated per DEPLOY.md §3 — load into GitHub secrets, never commit)
+eateggs_deploy
+eateggs_deploy.pub
+*.pem
+
 # Uploaded media & generated content
 wp-content/uploads/
 wp-content/cache/
