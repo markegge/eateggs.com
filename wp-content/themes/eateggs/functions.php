@@ -76,6 +76,9 @@ add_action( 'wp_enqueue_scripts', 'eateggs_assets' );
 // Flat-link nav walker for the header menu (no <ul>/<li>).
 require_once get_template_directory() . '/inc/class-eateggs-link-walker.php';
 
+// Customizer settings (homepage hero copy).
+require_once get_template_directory() . '/inc/customizer.php';
+
 /**
  * Estimate read time in minutes from a post's content.
  *
