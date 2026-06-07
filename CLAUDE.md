@@ -61,10 +61,10 @@ in. Non-obvious mechanics you must respect:
   internationalize strings with the **`eateggs`** text domain, and add
   `translators:` comments for any `printf`/`sprintf` placeholders.
 - Prefix all theme functions/globals with `eateggs_` / classes with `Eateggs_`.
-- Target **PHP 8.1** (matches the linter; keep it in sync with the server's PHP —
+- Target **PHP 8.4** (matches the linter and the server's PHP-FPM — keep them in sync —
   see `DEPLOY.md` §1).
 - Note: there's no PHP CLI on the host, but **Docker is available** — run the
-  CI lint locally with a PHP 8.1 + PHPCS image (matches CI exactly). Build:
+  CI lint locally with a PHP 8.4 + PHPCS image (matches CI exactly). Build:
   `docker build -f /tmp/phpcs.Dockerfile -t eateggs-phpcs /tmp` (see the recipe
   in Claude's project memory), then from the repo root:
   `docker run --rm -v "$PWD":/app -w /app eateggs-phpcs phpcbf` to auto-fix and
