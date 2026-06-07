@@ -1,6 +1,6 @@
 <?php
 /**
- * eateggs theme functions.
+ * Eateggs theme functions.
  *
  * @package eateggs
  */
@@ -22,7 +22,15 @@ function eateggs_setup() {
 		'html5',
 		array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' )
 	);
-	add_theme_support( 'custom-logo', array( 'height' => 48, 'width' => 48, 'flex-height' => true, 'flex-width' => true ) );
+	add_theme_support(
+		'custom-logo',
+		array(
+			'height'      => 48,
+			'width'       => 48,
+			'flex-height' => true,
+			'flex-width'  => true,
+		)
+	);
 
 	register_nav_menus(
 		array(
@@ -49,7 +57,7 @@ function eateggs_assets() {
 		'eateggs-google-fonts',
 		'https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap',
 		array(),
-		null
+		$ver
 	);
 
 	wp_enqueue_style( 'eateggs-tokens', $theme_uri . '/assets/tokens.css', array(), $ver );
@@ -65,31 +73,8 @@ function eateggs_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'eateggs_assets' );
 
-/**
- * Nav walker that emits flat <a> elements (no <ul>/<li>), so a user-managed
- * menu matches the design's .nav-links > a styling. The current item gets the
- * "active" class used by the static design.
- */
-class Eateggs_Link_Walker extends Walker_Nav_Menu {
-	public function start_lvl( &$output, $depth = 0, $args = null ) {}
-	public function end_lvl( &$output, $depth = 0, $args = null ) {}
-	public function end_el( &$output, $item, $depth = 0, $args = null ) {}
-
-	public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
-		$classes = array();
-		if ( in_array( 'current-menu-item', (array) $item->classes, true ) ) {
-			$classes[] = 'active';
-		}
-		$class_attr = $classes ? ' class="' . esc_attr( implode( ' ', $classes ) ) . '"' : '';
-		$url        = ! empty( $item->url ) ? $item->url : '#';
-		$output    .= sprintf(
-			'<a href="%1$s"%2$s>%3$s</a>',
-			esc_url( $url ),
-			$class_attr,
-			esc_html( $item->title )
-		);
-	}
-}
+// Flat-link nav walker for the header menu (no <ul>/<li>).
+require_once get_template_directory() . '/inc/class-eateggs-link-walker.php';
 
 /**
  * Estimate read time in minutes from a post's content.
@@ -121,14 +106,17 @@ function eateggs_primary_category( $post = null ) {
 	return $cats[0];
 }
 
+$GLOBALS['eateggs_toc'] = array();
+
 /**
  * Add slug ids to <h2>/<h3> headings in post content and collect them for a TOC.
  *
  * Stores the collected headings in a module-global so single.php can render the
  * sidebar table of contents before echoing the content.
+ *
+ * @param string $content The post content.
+ * @return string The post content with ids injected into its headings.
  */
-$GLOBALS['eateggs_toc'] = array();
-
 function eateggs_inject_heading_ids( $content ) {
 	if ( ! is_singular( 'post' ) || ! in_the_loop() || ! is_main_query() ) {
 		return $content;
