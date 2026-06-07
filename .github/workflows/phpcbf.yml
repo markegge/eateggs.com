@@ -5,6 +5,8 @@ name: PHPCBF autofix (temporary)
 # applied locally. Delete this file once the theme passes lint.
 
 on:
+  push:
+    branches: [ fix/phpcs-allow-plugin ]
   workflow_dispatch:
 
 env:
