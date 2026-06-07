@@ -1,8 +1,9 @@
 name: CI / Deploy
 
-# PRs are linted. Pushes to main deploy to staging automatically, then to
-# production after a manual approval (configured via the "production"
-# GitHub Environment — see DEPLOY.md).
+# PRs are linted. Pushes to main deploy to production after a manual approval
+# (configured via the "production" GitHub Environment — see DEPLOY.md).
+# Production is reached over a Cloudflare Tunnel (ssh.eateggs.com), so no origin
+# IP is ever exposed and port 22 stays closed to the internet.
 
 on:
   pull_request:
@@ -22,7 +23,7 @@ jobs:
     name: Lint (php -l + PHPCS)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -52,42 +53,9 @@ jobs:
       - name: Run PHPCS
         run: phpcs -q --report=checkstyle | cs2pr
 
-  deploy-staging:
-    name: Deploy to staging
-    needs: lint
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: https://staging.eateggs.com
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-
-      - name: Rsync theme to staging
-        run: |
-          rsync -az --delete \
-            --exclude='.git*' --exclude='node_modules' --exclude='vendor' \
-            -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts" \
-            "$THEME_DIR/" \
-            "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PATH }}/"
-
-      - name: Flush cache (best effort)
-        continue-on-error: true
-        run: |
-          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts \
-            "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" \
-            "wp cache flush --path=${{ secrets.STAGING_WP_PATH }} || true"
-
   deploy-production:
     name: Deploy to production
-    needs: deploy-staging
+    needs: lint
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # The "production" environment requires a manual approval (a required
@@ -96,32 +64,64 @@ jobs:
       name: production
       url: https://www.eateggs.com
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Set up SSH
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o "$RUNNER_TEMP/cloudflared"
+          sudo install -m 0755 "$RUNNER_TEMP/cloudflared" /usr/local/bin/cloudflared
+          cloudflared --version
+
+      - name: Set up SSH over Cloudflare Tunnel
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+          # Only needed if ssh.eateggs.com sits behind a Cloudflare Access policy.
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          proxy="cloudflared access ssh --hostname %h"
+          if [ -n "$CF_ACCESS_CLIENT_ID" ]; then
+            proxy="$proxy --service-token-id $CF_ACCESS_CLIENT_ID --service-token-secret $CF_ACCESS_CLIENT_SECRET"
+          fi
+          {
+            echo "Host $PROD_HOST"
+            echo "  User $PROD_USER"
+            echo "  IdentityFile ~/.ssh/deploy_key"
+            echo "  ProxyCommand $proxy"
+            echo "  StrictHostKeyChecking accept-new"
+            echo "  UserKnownHostsFile ~/.ssh/known_hosts"
+          } > ~/.ssh/config
 
       - name: Back up current theme on server
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_PATH: ${{ secrets.PROD_PATH }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts \
-            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" \
-            "cp -a '${{ secrets.PROD_PATH }}' '${{ secrets.PROD_PATH }}.bak-$(date +%Y%m%d%H%M%S)' || true"
+          ssh "$PROD_HOST" \
+            "cp -a '$PROD_PATH' '$PROD_PATH.bak-$(date +%Y%m%d%H%M%S)' || true"
 
       - name: Rsync theme to production
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_PATH: ${{ secrets.PROD_PATH }}
         run: |
           rsync -az --delete \
             --exclude='.git*' --exclude='node_modules' --exclude='vendor' \
-            -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts" \
+            -e ssh \
             "$THEME_DIR/" \
-            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_PATH }}/"
+            "$PROD_HOST:$PROD_PATH/"
 
       - name: Flush cache (best effort)
         continue-on-error: true
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_WP_PATH: ${{ secrets.PROD_WP_PATH }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts \
-            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" \
-            "wp cache flush --path=${{ secrets.PROD_WP_PATH }} || true"
+          ssh "$PROD_HOST" \
+            "wp cache flush --path=$PROD_WP_PATH || true"

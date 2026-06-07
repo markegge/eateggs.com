@@ -17,12 +17,13 @@ DEPLOY.md                    One-time server + GitHub setup, and how deploys wor
 
 1. Branch, edit the theme, open a pull request.
 2. CI lints the PR (`php -l` + PHPCS). Fix anything it flags.
-3. Merge to `main` → auto-deploys to **staging** (`staging.eateggs.com`).
-4. Verify staging, then approve the **production** deploy in the GitHub Actions
-   run. Production keeps a timestamped backup of the previous theme for rollback.
+3. Merge to `main` → CI lints, then the **production** deploy **waits for a
+   manual approval** in the GitHub Actions run.
+4. Approve it. Production keeps a timestamped backup of the previous theme for
+   rollback. Deploys reach the server over a Cloudflare Tunnel (`ssh.eateggs.com`);
+   there is no separate staging environment.
 
 Database content (posts, pages, settings) is **not** in this repo — that lives in
 MySQL and is edited in wp-admin as usual.
 
-See **[DEPLOY.md](DEPLOY.md)** for the full setup, including how to find the
-origin server IP behind Cloudflare.
+See **[DEPLOY.md](DEPLOY.md)** for the full setup.
