@@ -41,6 +41,21 @@ function eateggs_setup() {
 add_action( 'after_setup_theme', 'eateggs_setup' );
 
 /**
+ * Cache-busting version for a theme asset, from its file modification time.
+ *
+ * Using the mtime means the ?ver= query string changes whenever the file does,
+ * so browsers and the CDN fetch the new asset instead of a stale cached copy
+ * (the server sends these assets with a very long max-age).
+ *
+ * @param string $rel_path Path relative to the theme root, e.g. '/assets/styles.css'.
+ * @return string Cache-busting version (file mtime, or the theme version as a fallback).
+ */
+function eateggs_asset_ver( $rel_path ) {
+	$file = get_template_directory() . $rel_path;
+	return file_exists( $file ) ? (string) filemtime( $file ) : EATEGGS_VERSION;
+}
+
+/**
  * Enqueue styles and scripts.
  *
  * Order matters: tokens.css defines the CSS variables and @font-face rules that
@@ -50,25 +65,24 @@ add_action( 'after_setup_theme', 'eateggs_setup' );
  */
 function eateggs_assets() {
 	$theme_uri = get_template_directory_uri();
-	$ver       = EATEGGS_VERSION;
 
 	// Newsreader (used for headings/serif accents in the design).
 	wp_enqueue_style(
 		'eateggs-google-fonts',
 		'https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap',
 		array(),
-		$ver
+		EATEGGS_VERSION
 	);
 
-	wp_enqueue_style( 'eateggs-tokens', $theme_uri . '/assets/tokens.css', array(), $ver );
-	wp_enqueue_style( 'eateggs-styles', $theme_uri . '/assets/styles.css', array( 'eateggs-tokens' ), $ver );
+	wp_enqueue_style( 'eateggs-tokens', $theme_uri . '/assets/tokens.css', array(), eateggs_asset_ver( '/assets/tokens.css' ) );
+	wp_enqueue_style( 'eateggs-styles', $theme_uri . '/assets/styles.css', array( 'eateggs-tokens' ), eateggs_asset_ver( '/assets/styles.css' ) );
 
 	// WordPress requires the root style.css to be registered as the theme stylesheet.
-	wp_enqueue_style( 'eateggs-style', get_stylesheet_uri(), array( 'eateggs-styles' ), $ver );
+	wp_enqueue_style( 'eateggs-style', get_stylesheet_uri(), array( 'eateggs-styles' ), eateggs_asset_ver( '/style.css' ) );
 
 	// Scroll-spy for the single-post table of contents.
 	if ( is_singular( 'post' ) ) {
-		wp_enqueue_script( 'eateggs-scrollspy', $theme_uri . '/assets/scroll-spy.js', array(), $ver, true );
+		wp_enqueue_script( 'eateggs-scrollspy', $theme_uri . '/assets/scroll-spy.js', array(), eateggs_asset_ver( '/assets/scroll-spy.js' ), true );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'eateggs_assets' );
