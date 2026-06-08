@@ -73,7 +73,7 @@ img { max-width:100%; display:block; }
    HOME — Featured + card grid
    ============================================================= */
 .idx { padding:48px 0 72px; }
-.idx-head { max-width:680px; margin-bottom:34px; }
+.idx-head { margin-bottom:34px; }
 .idx-head h1 { font-family:var(--head); font-weight:800; font-size:clamp(30px,4vw,40px); letter-spacing:-0.025em; line-height:1.05; margin:12px 0 0; color:var(--ink); }
 .idx-head .lede { font-size:17px; color:var(--ink-mid); margin:14px 0 0; line-height:1.6; }
 
@@ -164,6 +164,7 @@ img { max-width:100%; display:block; }
 .foot-links { display:flex; flex-wrap:wrap; gap:11px; }
 .foot-links a { display:inline-flex; align-items:center; gap:8px; border:1.5px solid color-mix(in srgb,#fff 28%, var(--accent-deep)); border-radius:999px; padding:9px 16px; font-weight:500; font-size:14px; color:#fff; transition:all .15s; }
 .foot-links a:hover { background:color-mix(in srgb,#fff 12%, var(--accent-deep)); border-color:#fff; }
+.foot-links a svg { width:16px; height:16px; flex:0 0 auto; }
 .foot-bottom { margin-top:48px; padding-top:20px; border-top:1px solid color-mix(in srgb,#fff 18%, var(--accent-deep)); display:flex; justify-content:space-between; align-items:center; gap:16px; font-size:12.5px; color:color-mix(in srgb,#fff 60%, var(--accent-deep)); flex-wrap:wrap; }
 .foot-bottom .brand-word { font-size:15px; color:#fff; }
 
