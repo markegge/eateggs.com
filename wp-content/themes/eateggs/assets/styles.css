@@ -46,11 +46,11 @@ img { max-width:100%; display:block; }
 .brand-mark { width:30px; height:30px; border-radius:8px; flex:0 0 auto; }
 .brand-word { font-family:var(--head); font-weight:800; font-size:21px; letter-spacing:-0.02em; color:#fff; }
 .brand-tag { font-size:13.5px; color:color-mix(in srgb,#fff 62%, var(--accent)); padding-left:13px; margin-left:2px; border-left:1px solid color-mix(in srgb,#fff 26%, var(--accent)); }
-.nav-links { display:flex; align-items:center; gap:26px; }
+.nav-links { display:flex; align-items:center; gap:26px; margin-left:auto; }
 .nav-links a:not(.btn) { font-weight:500; font-size:14.5px; color:color-mix(in srgb,#fff 80%, var(--accent)); transition:color .15s; }
 .nav-links a:not(.btn):hover { color:#fff; }
 .nav-links a:not(.btn).active { color:#fff; font-weight:600; border-bottom:2px solid var(--cta); padding-bottom:3px; }
-.nav-search { width:34px; height:34px; border-radius:999px; border:1px solid color-mix(in srgb,#fff 30%, var(--accent)); background:transparent; color:#fff; display:inline-flex; align-items:center; justify-content:center; }
+.nav-search { width:34px; height:34px; margin-left:26px; border-radius:999px; border:1px solid color-mix(in srgb,#fff 30%, var(--accent)); background:transparent; color:#fff; display:inline-flex; align-items:center; justify-content:center; }
 
 /* Mobile hamburger toggle — hidden on desktop, revealed in the <=760px block. */
 .nav-toggle { display:none; }
@@ -122,6 +122,9 @@ img { max-width:100%; display:block; }
    ============================================================= */
 .post { padding:48px 0 72px; }
 .post-grid { display:grid; grid-template-columns:200px minmax(0,var(--read)) 1fr; gap:40px; max-width:1040px; margin:0 auto; align-items:start; }
+/* Let grid items shrink below their content's intrinsic width so a wide embed
+   (e.g. a fixed-width iframe) can't force a track past the viewport on mobile. */
+.railbox, .post-head, .post-hero, .post-cap, .prose, .post-foot { min-width:0; }
 .railbox { grid-column:1; grid-row:1 / span 3; position:sticky; top:calc(var(--nav-h) + 24px); border-top:2px solid var(--ink); padding-top:16px; }
 .railbox .rl { padding:11px 0; border-bottom:1px solid var(--rule); }
 .railbox .rl dt { font-size:10.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:4px; }
@@ -151,6 +154,12 @@ img { max-width:100%; display:block; }
 .prose figure .ph-img { aspect-ratio:3/2; border-radius:14px; background:var(--accent-soft); border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; color:var(--sage); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; font-weight:600; }
 .prose figure img { border-radius:14px; }
 .prose figcaption { font-size:12.5px; color:var(--ink-muted); margin-top:8px; text-align:center; }
+
+/* Responsive embeds: keep images, iframes, and other replaced media inside the
+   reading column on every screen so post content never overflows the viewport. */
+.prose :is(img, iframe, video, embed, object) { max-width:100%; }
+.prose img { height:auto; }
+.prose iframe { width:100%; aspect-ratio:16 / 9; height:auto; }
 
 .post-foot { grid-column:2; margin:44px 0 0; padding-top:26px; border-top:1px solid var(--rule); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .post-foot .lbl { font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-muted); margin-right:4px; }
@@ -188,7 +197,7 @@ img { max-width:100%; display:block; }
   /* The inline nav collapses into a dropdown panel opened by the hamburger. */
   .nav-toggle {
     display:inline-flex; flex-direction:column; justify-content:center; align-items:center;
-    width:40px; height:40px; padding:0; margin-left:auto;
+    width:40px; height:40px; padding:0; margin-left:8px;
     background:transparent; color:#fff; cursor:pointer;
     border:1px solid color-mix(in srgb,#fff 30%, var(--accent)); border-radius:8px;
     -webkit-tap-highlight-color:transparent;
@@ -208,12 +217,13 @@ img { max-width:100%; display:block; }
   }
   .s-head.nav-open .nav-links { display:flex; }
 
-  /* Full-width, comfortably tappable rows for the links and the search glyph. */
-  .nav-links > a:not(.btn),
-  .nav-links > .nav-search { width:100%; padding:13px 28px; justify-content:flex-start; }
+  /* Full-width, comfortably tappable rows for the panel links. */
+  .nav-links > a:not(.btn) { width:100%; padding:13px 28px; justify-content:flex-start; }
   .nav-links a:not(.btn) { font-size:16px; }
   .nav-links a:not(.btn).active { padding-bottom:13px; border-bottom:0; box-shadow:inset 3px 0 0 var(--cta); }
-  .nav-links > .nav-search { height:auto; border:0; border-radius:0; gap:8px; }
+  /* Search glyph lives in the top bar (not the dropdown): a compact circular
+     icon that clusters with the hamburger at the right, matching its weight. */
+  .nav-search { width:40px; height:40px; margin-left:auto; border-radius:999px; }
   /* Contact CTA as a clear, full-row button inside the panel. */
   .nav-links .btn-cta { display:flex; justify-content:center; margin:10px 28px; }
 
