@@ -26,7 +26,7 @@
 		<span class="brand-tag"><?php bloginfo( 'description' ); ?></span>
 		<?php endif; ?>
 	</a>
-	<nav class="nav-links" aria-label="<?php esc_attr_e( 'Primary', 'eateggs' ); ?>">
+	<nav id="primary-nav" class="nav-links" aria-label="<?php esc_attr_e( 'Primary', 'eateggs' ); ?>">
 		<?php
 		/*
 		* The design styles direct <a> children of .nav-links (including a CTA
@@ -52,5 +52,10 @@
 		<a class="btn btn-cta btn-sm" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"><?php esc_html_e( 'Contact', 'eateggs' ); ?></a>
 		<span class="nav-search" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></span>
 	</nav>
+	<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="<?php esc_attr_e( 'Toggle menu', 'eateggs' ); ?>">
+		<span class="bar" aria-hidden="true"></span>
+		<span class="bar" aria-hidden="true"></span>
+		<span class="bar" aria-hidden="true"></span>
+	</button>
 	</div>
 </header>

@@ -52,6 +52,11 @@ img { max-width:100%; display:block; }
 .nav-links a:not(.btn).active { color:#fff; font-weight:600; border-bottom:2px solid var(--cta); padding-bottom:3px; }
 .nav-search { width:34px; height:34px; border-radius:999px; border:1px solid color-mix(in srgb,#fff 30%, var(--accent)); background:transparent; color:#fff; display:inline-flex; align-items:center; justify-content:center; }
 
+/* Mobile hamburger toggle — hidden on desktop, revealed in the <=760px block. */
+.nav-toggle { display:none; }
+.nav-toggle .bar { display:block; width:22px; height:2px; background:#fff; border-radius:2px; transition:transform .2s ease, opacity .2s ease; }
+.nav-toggle .bar + .bar { margin-top:5px; }
+
 .cat-strip { border-bottom:1px solid var(--rule); background:var(--surface-2); position:sticky; top:var(--nav-h); z-index:49; }
 .cat-strip .row { display:flex; align-items:center; gap:8px; height:46px; overflow-x:auto; scrollbar-width:none; }
 .cat-strip .row::-webkit-scrollbar { display:none; }
@@ -180,12 +185,46 @@ img { max-width:100%; display:block; }
   .post-head, .prose, .post-hero, .post-cap, .post-foot { grid-column:1; }
 }
 @media (max-width:760px) {
-  .nav-links a:not(.btn):not(.active) { display:none; }
+  /* The inline nav collapses into a dropdown panel opened by the hamburger. */
+  .nav-toggle {
+    display:inline-flex; flex-direction:column; justify-content:center; align-items:center;
+    width:40px; height:40px; padding:0; margin-left:auto;
+    background:transparent; color:#fff; cursor:pointer;
+    border:1px solid color-mix(in srgb,#fff 30%, var(--accent)); border-radius:8px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* Hamburger -> X when the panel is open. */
+  .s-head.nav-open .nav-toggle .bar:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .s-head.nav-open .nav-toggle .bar:nth-child(2) { opacity:0; }
+  .s-head.nav-open .nav-toggle .bar:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+  /* Dropdown panel: hidden until the header gets the JS-set .nav-open class. */
+  .nav-links {
+    display:none; position:absolute; top:100%; left:0; right:0;
+    flex-direction:column; align-items:stretch; gap:0;
+    background:var(--accent); padding:8px 0;
+    border-top:1px solid color-mix(in srgb,#fff 16%, var(--accent));
+    box-shadow:0 12px 26px rgba(30,44,36,0.28); z-index:40;
+  }
+  .s-head.nav-open .nav-links { display:flex; }
+
+  /* Full-width, comfortably tappable rows for the links and the search glyph. */
+  .nav-links > a:not(.btn),
+  .nav-links > .nav-search { width:100%; padding:13px 28px; justify-content:flex-start; }
+  .nav-links a:not(.btn) { font-size:16px; }
+  .nav-links a:not(.btn).active { padding-bottom:13px; border-bottom:0; box-shadow:inset 3px 0 0 var(--cta); }
+  .nav-links > .nav-search { height:auto; border:0; border-radius:0; gap:8px; }
+  /* Contact CTA as a clear, full-row button inside the panel. */
+  .nav-links .btn-cta { display:flex; justify-content:center; margin:10px 28px; }
+
   .brand-tag { display:none; }
   .pgrid { grid-template-columns:1fr; }
   .post-grid { grid-template-columns:1fr; }
   .post-head, .prose, .post-hero, .post-cap, .post-foot { grid-column:1; }
   .foot-bottom { flex-direction:column; align-items:flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-toggle .bar { transition:none; }
 }
 @media (max-width:480px) {
   .container { padding:0 20px; }

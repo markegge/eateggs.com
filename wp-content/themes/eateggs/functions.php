@@ -80,6 +80,9 @@ function eateggs_assets() {
 	// WordPress requires the root style.css to be registered as the theme stylesheet.
 	wp_enqueue_style( 'eateggs-style', get_stylesheet_uri(), array( 'eateggs-styles' ), eateggs_asset_ver( '/style.css' ) );
 
+	// Mobile nav hamburger toggle. Loaded site-wide (the header is on every page).
+	wp_enqueue_script( 'eateggs-nav-toggle', $theme_uri . '/assets/nav-toggle.js', array(), eateggs_asset_ver( '/assets/nav-toggle.js' ), true );
+
 	// Scroll-spy for the single-post table of contents.
 	if ( is_singular( 'post' ) ) {
 		wp_enqueue_script( 'eateggs-scrollspy', $theme_uri . '/assets/scroll-spy.js', array(), eateggs_asset_ver( '/assets/scroll-spy.js' ), true );
